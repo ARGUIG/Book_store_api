@@ -27,10 +27,8 @@ const BooksSchema = new mongoose.Schema({
         required : true ,
         minlength : 0 
     },
-    image : {
-        type : String,
-        default : "default-avatar.png",
-        required : false
+    cover : {
+        type : String
     }
 },
 {
@@ -46,7 +44,7 @@ function createBookValidation(obj){
         author : Joi.string().trim().required().max(100).min(3),
         description : Joi.string().trim().required().max(200).min(6),
         price : Joi.number().required().min(0),
-        image : Joi.string()
+        cover : Joi.string()
     })
     return schema.validate(obj);
 }
@@ -57,7 +55,7 @@ function updateBookValidation(obj){
         author : Joi.string().trim().max(100).min(3),
         description : Joi.string().trim().max(200).min(6),
         price : Joi.number().min(0),
-        image : Joi.string()
+        cover : Joi.string()
     })
     return schema.validate(obj)
 } 

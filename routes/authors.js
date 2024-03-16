@@ -50,7 +50,8 @@ router.post(
             return res.status(400).json(error.details[0].message)
         }
         const Author = new Authors ({
-            fullName : req.body.fullName,
+            firstName : req.body.firstName,
+            lastName : req.body.lastName,
             age : req.body.age,
             nationnality : req.body.nationnality
             })
@@ -76,7 +77,8 @@ router.put(
         }else{
             const author = await Authors.findByIdAndUpdate(req.params.id , {
                 $set : {
-                    fullName : req.body.fullName,
+                    firstName : req.body.firstName,
+                    lastName : req.body.lastName,
                     age : req.body.age,
                     nationnality : req.body.nationnality
                 }

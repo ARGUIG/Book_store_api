@@ -27,7 +27,8 @@ router.put("/:id", verifyTokenAndAuthorization, asyncHandler( async (req,res) =>
         $set : {
             email : req.body.email,
             password : req.body.password,
-            username : req.body.username,
+            lastName : req.body.lastName,
+            firstName : req.body.firstName,
         }
     },{new : true}).select("-password")
     res.status(200).json(updateUser);

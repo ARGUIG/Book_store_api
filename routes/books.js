@@ -12,7 +12,15 @@ const {verifyTokenAndAdmin} = require("../middlewares/verifyToken")
  */
 router.get("/", asyncHandler(
     async (req,res) => {
-        const booksList = await Book.find().sort({ title : 1}).select("title author -_id"); // select is for filter by attribute
+        let booksList
+        const {minPrice, maxPrice} = req.query
+        if (minPrice && maxPrice){
+            booksList = await Book.find({price : {$gte : minPrice , $lte : maxPrice}}).sort({ title : 1})
+            .populate("author",["_id", "firstName", "lastName"])
+            // .select("title author -_id");  select is for filter by attribute
+        }else {
+            booksList = await Book.find().sort({ title : 1}).populate("author",["_id", "firstName", "lastName"])
+        }
         res.status(200).json(booksList);
     }
 ));
@@ -53,7 +61,7 @@ router.post(
                 author : req.body.author,
                 description : req.body.description,
                 price : req.body.price,
-                image : req.body.image
+                cover : req.body.cover
             }
         ) 
         const result = await book.save(); // it return a promise low success | low error
@@ -80,7 +88,7 @@ router.put(
                 author : req.body.author,
                 description : req.body.description,
                 price : req.body.price,
-                image : req.body.image
+                cover : req.body.cover
             }
         },
         {

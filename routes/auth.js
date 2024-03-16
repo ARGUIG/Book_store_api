@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const asyncHandler = require("express-async-handler");
-const { User, validateLoginUser, validateRegisterUser, validateUpdateUser, generateToken} = require("../models/User")
+const { User, validateLoginUser, validateRegisterUser, validateUpdateUser} = require("../models/User")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken");
 
@@ -27,11 +27,12 @@ router.post( "/register", asyncHandler( async (req,res) => {
 
         user = new User ({
             email : req.body.email,
-            username : req.body.username,
+            firstName : req.body.firstName,
+            lastName : req.body.lastName,
             password : req.body.password,
         });
         const result = await user.save();
-        const token = generateToken();
+        const token = user.generateToken();
         const { password , ...other} = result._doc;
 
         res.status(201).json({...other, token});
@@ -59,7 +60,7 @@ router.post( "/login", asyncHandler( async (req,res) => {
         return res.status(400).json({ message : "invalid Email or Password"});
     }
 
-    const token = generateToken();
+    const token = user.generateToken();
     const { password , ...other} = user._doc;
     res.status(200).json({...other, token});
 }

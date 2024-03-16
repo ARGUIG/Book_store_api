@@ -12,7 +12,14 @@ const userSchema = new mongoose.Schema({
         maxlength : 100,
         unique : true,
     },
-    username : {
+    firstName : {
+        type : String,
+        required : true,
+        trim : true ,
+        minlength : 2,
+        maxlength : 200,
+    },
+    lastName : {
         type : String,
         required : true,
         trim : true ,
@@ -31,19 +38,23 @@ const userSchema = new mongoose.Schema({
     },
 },{ timestamps : true } );
 
-// Create User Model
-const User =  mongoose.model("User",userSchema);
 
 // Generate Token 
 function generateToken(){
     return jwt.sign({ id:this._id, isAdmin:this.isAdmin}, process.env.JWT_SECRET_KEY, {expiresIn:"2h"})
-}
+};
+userSchema.methods.generateToken = generateToken;
+
+
+// Create User Model
+const User =  mongoose.model("User",userSchema);
 
 // Validation register User
 function validateRegisterUser(obj){
     const schema = Joi.object({
         email : Joi.string().trim().required().min(5).max(100).email(),
-        username : Joi.string().trim().required().min(2).max(200),
+        firstName : Joi.string().trim().required().min(2).max(200),
+        lastName : Joi.string().trim().required().min(2).max(200),
         password : Joi.string().trim().required().min(6),
     });
     return schema.validate(obj);
@@ -62,7 +73,8 @@ function validateLoginUser(obj){
 function validateUpdateUser(obj){
     const schema = Joi.object({
         email : Joi.string().trim().min(5).max(100).email(),
-        username : Joi.string().trim().min(2).max(200),
+        firstName : Joi.string().trim().min(2).max(200),
+        lastName : Joi.string().trim().min(2).max(200),
         password : Joi.string().trim().min(6),
     });
     return schema.validate(obj);
