@@ -12,13 +12,18 @@ const app =express();
 
 // Apply middlewares
 app.use(express.json()); 
+app.use(express.urlencoded({extended:false})) // expressJS doesn't know urlencoded that comes from ejs(form)
 app.use(logger);
+
+// set view engine
+app.set('view engine', 'ejs')
 
 // routes
 app.use("/api/books", require("./routes/books"));
 app.use("/api/authors",require("./routes/authors"));
 app.use("/api/auth",require("./routes/auth"));
 app.use("/api/users",require("./routes/users"));
+app.use("/password",require("./routes/password"));
 
 // Error handler middlewares
 app.use(notFound);
