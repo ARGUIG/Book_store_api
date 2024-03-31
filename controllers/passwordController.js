@@ -1,6 +1,8 @@
 const asyncHandler = require("express-async-handler")
-const User = require("../models/User")
 const jwt = require("jsonwebtoken")
+const {User} = require("../models/User")
+const bcrypt = require("bcryptjs")
+const nodemailer = require("nodemailer")
 
 /** 
  * @desc    Get forgot password view
@@ -9,7 +11,7 @@ const jwt = require("jsonwebtoken")
  * @access  public
  */
 const getForgotPasswordView = asyncHandler ( (req,res) => {
-    res.render('forgot-password') // render takes the view(html) and send it to the client
+    res.render('forgot-password') // render takes the view(html) and sends it to the client
 })
 
 /** 
@@ -27,10 +29,88 @@ const sendForgotPasswordLink = asyncHandler( async (req,res) => {
     const token = jwt.sign({email : user.email, id : user.id} , secret , {expiresIn : '10m'})
     const link =  `http://localhost:4000/password/reset-password/${user._id}/${token}`
 
-    res.json({mesage : 'Click on the Link', resetPasswordLink: link})
+    const transporter = nodemailer.createTransport({
+        service : "gmail",
+        auth : {
+            user : process.env.USER_EMAIL,
+            pass : process.env.USER_PASS
+        }
+    })
+
+    const mailOptions = {
+        from : process.env.USER_EMAIL,
+        to : user.email,
+        subject : "Reset Password",
+        html : `<div>
+                    <h4>Click on the link bellow to reset your password</h4>
+                    <p>${link}</p>
+                </div>`
+    }
+
+    transporter.sendMail(mailOptions, function(error,success){
+        if (error){
+            console.log(error)
+        } else {
+            console.log("Email sent: " + success.response)
+        }
+    })
+    res.render("link-send");
+    // res.json({mesage : 'Click on the Link', resetPasswordLink: link})
 })
+
+/** 
+ * @desc    Get Reset password View
+ * @route   /password/reset-password/:userId/:token
+ * @method  GET
+ * @access  public
+ */
+const getResetPasswordView = asyncHandler( async (req,res) => {
+    const user = await User.findById(req.params.userId)
+    if (!user) {
+        return res.status(404).json({message : "User Not Found"})
+    }
+    const secret = process.env.JWT_SECRET_KEY + user.password
+    try {
+        jwt.verify(req.params.token,secret)
+        res.render('reset-password',{email:user.email}) // sending email to the view
+    } catch (error) {
+        console.log(error)
+        res.json({mesage:"Error"})
+    }
+})
+
+/** 
+ * @desc    Reset password 
+ * @route   /password/reset-password/:userId/:token
+ * @method  POST
+ * @access  public
+ */
+const resetThePassword = asyncHandler( async (req,res) => {
+    // TO DO : validation password
+    const user = await User.findById(req.params.userId)
+    if (!user) {
+        return res.status(404).json({message : "User Not Found"})
+    }
+    const secret = process.env.JWT_SECRET_KEY + user.password
+    try {
+        jwt.verify(req.params.token,secret)
+        
+        const salt = await bcrypt.genSalt(10)
+        req.body.password = await bcrypt.hash(req.body.password, salt)
+
+        user.password = req.body.password;
+        await user.save()
+        res.render('success-password')
+    } catch (error) {
+        console.log(error)
+        res.json({mesage:"Error"})
+    }
+})
+
 
 module.exports = {
     getForgotPasswordView,
     sendForgotPasswordLink,
+    getResetPasswordView,
+    resetThePassword
 }

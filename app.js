@@ -24,6 +24,8 @@ app.use("/api/authors",require("./routes/authors"));
 app.use("/api/auth",require("./routes/auth"));
 app.use("/api/users",require("./routes/users"));
 app.use("/password",require("./routes/password"));
+app.use("/api/upload",require("./routes/upload"));
+
 
 // Error handler middlewares
 app.use(notFound);
