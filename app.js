@@ -4,6 +4,8 @@ const { notFound, errorHandler} = require("./middlewares/errors")
 require("dotenv").config(); 
 const connectToDB = require("./config/db");
 const path = require("path")
+const helmet = require("helmet")
+const cors = require("cors")
 
 // connection to DB
 connectToDB()
@@ -18,6 +20,12 @@ app.use(express.static(path.join(__dirname,"images")))
 app.use(express.json()); 
 app.use(express.urlencoded({extended:false})) // expressJS doesn't know urlencoded that comes from ejs(form)
 app.use(logger);
+
+// helmet
+app.use(helmet())
+
+// cors policy
+app.use(cors())
 
 // set view engine
 app.set('view engine', 'ejs')
