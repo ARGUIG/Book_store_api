@@ -3,12 +3,16 @@ const logger = require("./middlewares/logger");
 const { notFound, errorHandler} = require("./middlewares/errors")
 require("dotenv").config(); 
 const connectToDB = require("./config/db");
+const path = require("path")
 
 // connection to DB
 connectToDB()
 
 // init app
 const app =express();
+
+// Static folder
+app.use(express.static(path.join(__dirname,"images")))
 
 // Apply middlewares
 app.use(express.json()); 
